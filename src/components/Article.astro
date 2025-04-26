@@ -1,0 +1,12 @@
+---
+// Displays article title, date, and content
+const { title, date } = Astro.props;
+---
+<article class="blog-article">
+  <h2>{title}</h2>
+  <p class="article-date">{date}</p>
+  <hr />
+  <div class="article-body">
+	<slot />
+  </div>
+</article>

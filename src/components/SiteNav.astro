@@ -1,0 +1,66 @@
+---
+---
+<nav class="site-nav">
+  <div class="nav-content">
+    <a href="/about">About</a>
+    <a href="/archive">Archive</a>
+  </div>
+</nav>
+
+<style>
+  .site-nav {
+    background: white;
+    padding: 0;
+    text-align: left;
+    margin-top: -1px; /* Remove any gap between header and nav */
+    position: relative;
+    z-index: 2;
+  }
+
+  .nav-content {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0;
+    position: relative;
+    padding-top: 0; /* Space for the title that bleeds down */
+    padding-bottom: 3.5rem; /* Some bottom padding */
+  }
+
+  .site-nav a {
+    font-family: 'Sentient', 'Georgia', serif;
+    font-size: 2.5rem;
+    margin: -0.95rem 1.5rem 0 1.5rem;
+    font-weight: 400;
+    color: black;
+    text-decoration: none;
+    position: relative;
+    z-index: 3;
+    display: inline-block;
+    transform: rotate(180deg); /* Flip text right-side up so it's readable */
+    transition: all 0.2s ease;
+  }
+  
+  /* Inspired (heavily) by https://codepen.io/geoffgraham/pen/yLzvXyL */
+  .site-nav a::before {
+    background: #ff9a3c;
+    content: "";
+    inset: 0;
+    position: absolute;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.25s ease-in-out;
+    z-index: -1;
+  }
+  
+  .site-nav a:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  @media (max-width: 700px) {
+    .nav-content {
+      padding-top: 2.5rem; /* Less space needed for smaller title on mobile */
+    }
+  }
+</style>

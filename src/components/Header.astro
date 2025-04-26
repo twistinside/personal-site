@@ -1,0 +1,80 @@
+---
+---
+<header class="site-header">
+  <div class="header-content">
+    <h1 class="logo">
+      <a href="/" aria-label="Twistinside home">Twistinside</a>
+    </h1>
+  </div>
+</header>
+
+<style>
+  /* Add critical header styles inline to prevent FOUC */
+  .site-header {
+    background: black;
+    color: white;
+    padding: 10rem 2rem 0;
+    position: relative;
+    height: 16rem;
+    transition: padding 0.5s ease, height 0.5s ease;
+    z-index: 1;
+  }
+
+  .header-content {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    height: 100%;
+  }
+
+  .logo {
+    font-family: 'Nightingale', Georgia, serif;
+    font-size: 8.5rem;
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    position: absolute;
+    bottom: -0.25em;
+    left: 0;
+    right: 0;
+    transition: font-size 0.5s ease, bottom 0.5s ease;
+    pointer-events: none; /* Make the logo text non-interactive */
+  }
+
+  .logo a {
+    color: white;
+    text-decoration: none;
+    pointer-events: auto; /* Re-enable pointer events just for the link */
+    display: inline-block;
+  }
+  
+  .logo a:hover {
+    text-decoration: none;
+  }
+
+  /* Font fallback to prevent layout shift */
+  .logo.font-loading {
+    font-family: Georgia, serif;
+  }
+
+  @media (max-width: 768px) {
+    .logo {
+      font-size: 5.25rem;
+      bottom: -0.25em;
+    }
+    
+    .site-header {
+      padding: 8rem 2rem 0;
+      height: 12rem;
+    }
+  }
+</style>
+
+<script>
+  // Add font loading detection
+  document.fonts.ready.then(() => {
+    document.documentElement.classList.add('fonts-loaded');
+  });
+</script>

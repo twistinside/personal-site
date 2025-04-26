@@ -1,0 +1,43 @@
+/* Minimal code styling - structure, font, and raccoon image */
+html body pre,
+html body pre[class*="language-"] {
+  font-family: 'IA Mono', monospace !important;
+  font-size: 0.9rem !important;
+  tab-size: 2 !important;
+  -moz-tab-size: 2 !important;
+  -o-tab-size: 2 !important;
+  background-color: #F5F5F5 !important;
+  border-radius: 8px !important;
+  padding: 1.5rem !important;
+  padding-right: 3.5rem !important; /* Extra space for the raccoon image */
+  margin: 1.5rem 0 !important;
+  overflow-x: auto !important;
+  border: 1px solid #E0E0E0 !important;
+  position: relative !important; /* Required for absolute positioning of the raccoon */
+}
+
+/* Add raccoon image to code blocks */
+html body pre::after,
+html body pre[class*="language-"]::after {
+  content: "" !important;
+  background-image: url('/images/raccoon.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  position: absolute !important;
+  width: 40px !important;
+  height: 40px !important;
+  bottom: 0.5rem !important;
+  right: 0.5rem !important;
+  opacity: 0.85 !important;
+}
+
+/* Inline code styling */
+html body :not(pre) > code {
+  font-family: 'IA Mono', monospace !important;
+  font-size: 0.85rem !important;
+  background-color: #F5F5F5 !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 4px !important;
+  border: 1px solid #E0E0E0 !important;
+}

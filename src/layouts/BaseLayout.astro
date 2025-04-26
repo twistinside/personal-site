@@ -1,0 +1,97 @@
+---
+import Header from '../components/Header.astro';
+import SiteNav from '../components/SiteNav.astro';
+import Footer from '../components/Footer.astro';
+const { title = "Twistinside" } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/fonts/nightingale.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/sentient-light.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/ia-mono-regular.woff2" as="font" type="font/woff2" crossorigin />
+    
+    <!-- Prevent FOUC -->
+    <style>
+      html {
+        visibility: hidden;
+      }
+    </style>
+    
+    <link rel="stylesheet" href="/styles/global.css" />
+    <link rel="stylesheet" href="/styles/custom-code.css" />
+    
+    <!-- Restore visibility once CSS is loaded -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        document.documentElement.style.visibility = 'visible';
+      });
+    </script>
+  </head>
+  <body>
+    <Header />
+    <SiteNav />
+    <main class="site-main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style is:global>
+  /* Global styling for aside tags that will apply everywhere */
+  aside {
+    background-color: #FFF3E6 !important; /* Light orange background */
+    border-left: 4px solid #FF9A3C !important; /* Deeper orange border */
+    padding: 1rem !important; /* Reduced from 1.5rem for more compact appearance */
+    padding-right: 3.5rem !important; /* Extra space for the fox image */
+    margin: 1.5rem 0 !important; /* Reduced from 2rem */
+    position: relative !important;
+    font-family: 'Nightingale', Georgia, serif !important;
+    font-size: 1.1rem !important; /* Reduced from 1.3rem */
+    line-height: 1.3 !important; /* Slightly tighter line height */
+    color: #5A3E2B !important; /* Warm brown text color */
+    border-radius: 0 8px 8px 0 !important;
+    box-shadow: 0 2px 8px rgba(255, 154, 60, 0.1) !important;
+  }
+
+  aside p {
+    margin: 0.5rem 0 !important; /* Even spacing above and below paragraphs */
+  }
+
+  aside p:first-child {
+    margin-top: 0 !important; /* Remove top margin from first paragraph */
+  }
+
+  aside p:last-child {
+    margin-bottom: 0 !important; /* Remove bottom margin from last paragraph */
+  }
+
+  aside::after {
+    content: "" !important;
+    background-image: url('/images/fox.png') !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    position: absolute !important;
+    width: 40px !important;
+    height: 40px !important;
+    bottom: 0.5rem !important;
+    right: 0.5rem !important;
+    opacity: 0.85 !important;
+  }
+</style>
+
+<style>
+  .site-main {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    transition: max-width 0.5s ease, margin 0.5s ease;
+  }
+</style>

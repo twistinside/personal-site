@@ -1,83 +1,65 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 
+const { slug } = Astro.params;
 const articles = await getCollection('articles');
-const sorted = articles.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
-const latestFive = sorted.slice(0, 5);
+const post = articles.find((a) => a.slug === slug);
+
+if (!post) {
+  throw new Error(`Post not found for slug: ${slug}`);
+}
+
+const { Content } = await post.render();
 
 // Function to format date as "Month Day, Year"
-function formatDate(date: Date) {
+function formatDate(date) {
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   }).format(date);
 }
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles');
+  return articles.map((article) => ({
+    params: { slug: article.slug },
+  }));
+}
 ---
-<BaseLayout>
-  <div class="home-articles">
-    {latestFive.map(async (article, index) => {
-      const { Content } = await article.render();
-      return (
-        <article class="home-article">
-          <header>
-            <h2><a href={`/articles/${article.slug}`}>{article.data.title}</a></h2>
-            <p class="article-date">{formatDate(article.data.date)}</p>
-          </header>
-          <div class="article-content">
-            <Content />
-          </div>
-          {index < latestFive.length - 1 && <hr class="article-divider" />}
-        </article>
-      );
-    })}
-  </div>
+
+<BaseLayout title={post.data.title}>
+  <article class="blog-article">
+    <h2>{post.data.title}</h2>
+    <p class="article-date">{formatDate(post.data.date)}</p>
+    <div class="article-content">
+      <Content />
+    </div>
+  </article>
 </BaseLayout>
 
 <style>
-  .home-articles {
-    margin-top: 0;
-  }
-  
-  .home-article {
-    margin-bottom: 3rem;
-  }
-  
-  .home-article:first-child {
-    margin-top: 0;
-  }
-  
-  .home-article h2 {
+  .blog-article h2 {
+    font-size: 2rem;
     margin-bottom: 0.5rem;
-    margin-top: 0;
   }
-  
-  .home-article h2 a {
-    color: inherit;
-    text-decoration: none;
-  }
-  
-  .home-article h2 a:hover {
-    text-decoration: underline;
-  }
-  
+
   .article-date {
     color: #666;
-    margin: 0;
-    font-size: 0.9rem;
+    margin-bottom: 1rem;
   }
-  
+
   .article-content {
     font-weight: 300;
     line-height: 1.6;
     font-size: 1.1rem;
   }
-  
+
   .article-content p {
     margin-bottom: 1.5rem;
   }
-  
+
   /* Fancy styling for aside tags */
   .article-content aside {
     background-color: #FFF3E6; /* Light orange background */
@@ -110,10 +92,19 @@ function formatDate(date: Date) {
     color: #FF9A3C;
     opacity: 0.6;
   }
-  
-  .article-divider {
-    margin: 3rem 0;
-    border: 0;
-    border-top: 1px solid #eaeaea;
+
+  .aside-note {
+    background: #f7e5cc;
+    border-left: 4px solid #d78f2b;
+    padding: 1rem;
+    margin: 2rem 0;
+    position: relative;
+  }
+
+  .aside-note .fox-icon {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    height: 40px;
   }
 </style>

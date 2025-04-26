@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const articles = await getCollection('articles');
+const sorted = articles.sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
+---
+<BaseLayout title="Archive | Twistinside">
+  <h1>Article Archive</h1>
+  <p class="archive-intro">All articles published on Twistinside, from newest to oldest.</p>
+  
+  <ul class="archive-list">
+    {sorted.map(article => (
+      <li>
+        <span class="archive-date">{article.data.date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}</span>
+        <a href={`/articles/${article.slug}`}>{article.data.title}</a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .archive-intro {
+    color: #666;
+    margin-bottom: 2rem;
+  }
+  
+  .archive-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .archive-list li {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: baseline;
+  }
+  
+  .archive-date {
+    color: #666;
+    min-width: 150px;
+    font-size: 0.9rem;
+  }
+  
+  .archive-list a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .archive-list a:hover {
+    text-decoration: underline;
+  }
+</style>
