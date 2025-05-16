@@ -21,6 +21,28 @@ const { title = "Twistinside" } = Astro.props;
       html {
         visibility: hidden;
       }
+      
+      /* Add critical font styles to prevent FOUC */
+      @font-face {
+        font-family: 'Nightingale';
+        src: url('/fonts/nightingale.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+      
+      /* Pre-define logo styles to prevent size jump */
+      .logo {
+        font-family: 'Nightingale', Georgia, serif;
+        font-size: 8.5rem;
+        font-weight: 300;
+      }
+      
+      @media (max-width: 768px) {
+        .logo {
+          font-size: 5.25rem;
+        }
+      }
     </style>
     
     <link rel="stylesheet" href="/styles/global.css" />
@@ -29,7 +51,16 @@ const { title = "Twistinside" } = Astro.props;
     <!-- Restore visibility once CSS is loaded -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        document.documentElement.style.visibility = 'visible';
+        // Ensure fonts are loaded before showing content
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => {
+            document.documentElement.style.visibility = 'visible';
+            document.documentElement.classList.add('fonts-loaded');
+          });
+        } else {
+          // Fallback for browsers that don't support document.fonts
+          document.documentElement.style.visibility = 'visible';
+        }
       });
     </script>
   </head>
