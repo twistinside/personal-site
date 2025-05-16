@@ -5,7 +5,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <div class="about-container">
     <div class="about-content">
       <h2>The Author</h2>
-      
       <p>
         My name is Karl. I'm a second career developer, and most of my few years as a profeessional developer has been working in production backend systems. I made the switch to mobile development in late 2024. My home or passion projects tend to be Swift based, though I haven't been able to fully overlap my professional and personal goals yet.
       </p>
@@ -15,27 +14,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </p>
       
       <p>
-        If I have not satisfied your curiosity, you can find out more about me at <a href=https://github.com/twistinside>GitHub</a> or <a href=https://www.linkedin.com/in/karl-groff-43a32876>LinkedIn</a>.
+        If I have not satisfied your curiosity, you can find out more about me at <a href="https://github.com/twistinside">GitHub</a> or <a href="https://www.linkedin.com/in/karl-groff-43a32876">LinkedIn</a>.
       </p>
       
       <h2>The Website</h2>
-      
       <p>
-        This site is an Astro project hosted by my domain name registrar, <a href=https://porkbun.com>Porkbun</a>. The code is managed (and public at the link above) on GitHub and published using GitHub actions. I am generaly very happy with all of the above!
+        This site is an Astro project hosted by my domain name registrar, <a href="https://porkbun.com">Porkbun</a>. The code is managed (and public at the link above) on GitHub and published using GitHub actions. I am generaly very happy with all of the above!
       </p>
       
       <p>
-        I use a few fonts throughout the site. The title and aside is in <a href=https://deathoftypography.com/nightingale>Nigthingale</a> by <a href=https://deathoftypography.com>Death of Typography</a>. The body and heading text is in <a href=https://www.fontshare.com/fonts/sentient>Sentient</a> by <a href=https://www.indiantypefoundry.com>Indian Type Foundry</a>. Finally, code is in <a href=https://github.com/iaolo/iA-Fonts/tree/master/iA%20Writer%20Mono>iA Writer Mono</a> by <a href=https://ia.net>iA</a>.
-      </p>
-      
-      <h2>Twistinside and Generative AI</h2>
-      
-      <p>
-        I am a huge fan of generative AI, and I use it constantly as a sounding board and even mentor. Much of this site was created while in deep discussion with one robot or another, but I see generative AI as an adjunct to the creative endevors of a person. While much of the code for the site was written by generative AI, the design and content was not.
-      </p>
-      
-      <p>
-        The thoughts expressed here are artisinal and hand crafted, and will remain so.
+        I use a few fonts throughout the site. The title and aside is in <a href="https://deathoftypography.com/nightingale">Nigthingale</a> by <a href="https://deathoftypography.com">Death of Typography</a>. The body and heading text is in <a href="https://www.fontshare.com/fonts/sentient">Sentient</a> by <a href="https://www.indiantypefoundry.com">Indian Type Foundry</a>. Finally, code is in <a href="https://github.com/iaolo/iA-Fonts/tree/master/iA%20Writer%20Mono">iA Writer Mono</a> by <a href="https://ia.net">iA</a>.
       </p>
     </div>
   </div>
@@ -48,16 +36,52 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
   
   h1 {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem; /* Reduced from 2rem to 1rem */
   }
   
   h2 {
     margin-top: 2.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem; /* Reduced from 1rem to 0.5rem */
   }
   
   .about-content p {
     margin-bottom: 1.5rem;
     line-height: 1.6;
+  }
+  
+  /* Match link styling with the rest of the site */
+  .about-content a {
+    position: relative;
+    color: #333;
+    text-decoration: underline; /* Add underline for body text links */
+    transition: color 0.25s ease-in-out;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+  
+  .about-content a::before {
+    background: #ff9a3c;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.25s ease-in-out;
+    z-index: -1;
+    margin: 0;
+    will-change: transform;
+  }
+  
+  .about-content a:hover {
+    text-decoration: none;
+    transform: translateZ(0);
+  }
+  
+  .about-content a:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
   }
 </style>

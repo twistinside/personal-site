@@ -38,19 +38,32 @@
     z-index: 3;
     display: inline-block;
     transform: rotate(180deg); /* Flip text right-side up so it's readable */
-    transition: all 0.2s ease;
+    /* Remove padding and keep only stabilizing properties */
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
   }
   
   /* Inspired (heavily) by https://codepen.io/geoffgraham/pen/yLzvXyL */
   .site-nav a::before {
     background: #ff9a3c;
     content: "";
-    inset: 0;
     position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     transform: scaleX(0);
     transform-origin: right;
     transition: transform 0.25s ease-in-out;
     z-index: -1;
+    /* Add a small offset to prevent text movement */
+    margin: 0;
+    will-change: transform;
+  }
+  
+  .site-nav a:hover {
+    /* Prevent text movement on hover */
+    transform: rotate(180deg) translateZ(0);
   }
   
   .site-nav a:hover::before {
@@ -58,9 +71,16 @@
     transform-origin: left;
   }
 
-  @media (max-width: 700px) {
+  /* Add responsive styling for smaller screens */
+  @media (max-width: 768px) {
+    .site-nav a {
+      font-size: 1.8rem;
+      margin: -0.65rem 1rem 0 1rem;
+      /* Remove padding */
+    }
+    
     .nav-content {
-      padding-top: 2.5rem; /* Less space needed for smaller title on mobile */
+      padding-bottom: 2.5rem;
     }
   }
 </style>

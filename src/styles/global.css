@@ -75,26 +75,10 @@ body {
   color: #222;
 }
 
-/* Add global transition for smoother animations */
-* {
-  transition: all 0.3s ease-in-out;
-}
-
 /* Basic typography and element styling */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 300;
   line-height: 1.2;
-}
-
-a {
-  color: #0066cc;
-  transition: all 0.2s ease;
-}
-
-a:hover {
-  background-color: #FFF3E6; /* Light orange background */
-  border-radius: 2px;
-  text-decoration: none;
 }
 
 hr {

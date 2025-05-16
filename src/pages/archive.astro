@@ -3,11 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
 const articles = await getCollection('articles');
-const sorted = articles.sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
+const sorted = articles.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 ---
 <BaseLayout title="Archive | Twistinside">
-  <h1>Article Archive</h1>
-  <p class="archive-intro">All articles published on Twistinside, from newest to oldest.</p>
+  <h1>Site Archive</h1>
+  <p class="archive-intro">All the articles that have been published on this site, ordered from newest to oldest.</p>
   
   <ul class="archive-list">
     {sorted.map(article => (
@@ -32,6 +32,7 @@ const sorted = articles.sort((a, b) => new Date(b.data.date) - new Date(a.data.d
   .archive-list {
     list-style: none;
     padding: 0;
+    /* Remove specific margin since it's now handled by site-main */
   }
   
   .archive-list li {
@@ -47,12 +48,38 @@ const sorted = articles.sort((a, b) => new Date(b.data.date) - new Date(a.data.d
   }
   
   .archive-list a {
-    color: inherit;
-    text-decoration: none;
-    font-weight: bold;
+    position: relative;
+    color: #333;
+    text-decoration: none; /* Remove underline */
+    font-weight: normal; /* Remove bold */
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: color 0.25s ease-in-out;
+  }
+  
+  .archive-list a::before {
+    background: #ff9a3c;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.25s ease-in-out;
+    z-index: -1;
+    margin: 0;
+    will-change: transform;
   }
   
   .archive-list a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    transform: translateZ(0);
+  }
+  
+  .archive-list a:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
   }
 </style>

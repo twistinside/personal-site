@@ -51,15 +51,12 @@ function formatDate(date: Date) {
   .home-article h2 {
     margin-bottom: 0.5rem;
     margin-top: 0;
+    font-size: 2rem;
   }
   
   .home-article h2 a {
     color: inherit;
-    text-decoration: none;
-  }
-  
-  .home-article h2 a:hover {
-    text-decoration: underline;
+    text-decoration: none; /* Explicitly ensure no underline for article titles */
   }
   
   .article-date {
@@ -72,6 +69,14 @@ function formatDate(date: Date) {
     font-weight: 300;
     line-height: 1.6;
     font-size: 1.1rem;
+  }
+  
+  .article-content a {
+    text-decoration: underline; /* Add underline for links in article content */
+  }
+  
+  .article-content a:hover {
+    text-decoration: none; /* Remove underline on hover */
   }
   
   .article-content p {
@@ -99,16 +104,6 @@ function formatDate(date: Date) {
 
   .article-content aside p:last-child {
     margin-bottom: 0;
-  }
-
-  .article-content aside::before {
-    content: "✦"; /* Decorative element */
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    font-size: 1.2rem;
-    color: #FF9A3C;
-    opacity: 0.6;
   }
   
   .article-divider {
