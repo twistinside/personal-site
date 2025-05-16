@@ -32,7 +32,6 @@ const sorted = articles.sort((a, b) => new Date(b.data.date).getTime() - new Dat
   .archive-list {
     list-style: none;
     padding: 0;
-    /* Remove specific margin since it's now handled by site-main */
   }
   
   .archive-list li {
@@ -50,8 +49,8 @@ const sorted = articles.sort((a, b) => new Date(b.data.date).getTime() - new Dat
   .archive-list a {
     position: relative;
     color: #333;
-    text-decoration: none; /* Remove underline */
-    font-weight: normal; /* Remove bold */
+    text-decoration: none;
+    font-weight: normal;
     transform-style: preserve-3d;
     backface-visibility: hidden;
     transition: color 0.25s ease-in-out;

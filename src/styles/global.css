@@ -62,7 +62,6 @@
   font-display: swap;
 }
 
-/* Critical styles applied immediately */
 html, body {
   margin: 0;
   padding: 0;
@@ -75,7 +74,6 @@ body {
   color: #222;
 }
 
-/* Basic typography and element styling */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 300;
   line-height: 1.2;
@@ -87,7 +85,6 @@ hr {
   margin: 2rem 0;
 }
 
-/* Global utility classes */
 .text-center {
   text-align: center;
 }

@@ -9,15 +9,12 @@
 </header>
 
 <style>
-  /* Add critical header styles inline to prevent FOUC */
   .site-header {
     background: black;
     color: white;
     padding: 10rem 2rem 0;
     position: relative;
     height: 16rem;
-    /* Remove transition for smoother resizing */
-    /* transition: padding 0.5s ease, height 0.5s ease; */
     z-index: 1;
   }
 
@@ -40,13 +37,13 @@
     bottom: -0.25em;
     left: 0;
     right: 0;
-    pointer-events: none; /* Make the logo text non-interactive */
+    pointer-events: none;
   }
 
   .logo a {
     color: white;
     text-decoration: none;
-    pointer-events: auto; /* Re-enable pointer events just for the link */
+    pointer-events: auto;
     display: inline-block;
   }
   
@@ -54,7 +51,6 @@
     text-decoration: none;
   }
 
-  /* Font fallback to prevent layout shift */
   .logo.font-loading {
     font-family: Georgia, serif;
   }
@@ -71,7 +67,3 @@
     }
   }
 </style>
-
-<script>
-  // Font loading detection is now handled in BaseLayout
-</script>

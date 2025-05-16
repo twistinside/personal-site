@@ -75,32 +75,31 @@ const { title = "Twistinside" } = Astro.props;
 </html>
 
 <style is:global>
-  /* Global styling for aside tags that will apply everywhere */
   aside {
-    background-color: #FFF3E6 !important; /* Light orange background */
-    border-left: 4px solid #FF9A3C !important; /* Deeper orange border */
-    padding: 1rem !important; /* Reduced from 1.5rem for more compact appearance */
-    padding-right: 3.5rem !important; /* Extra space for the fox image */
-    margin: 1.5rem 0 !important; /* Reduced from 2rem */
+    background-color: #FFF3E6 !important;
+    border-left: 4px solid #FF9A3C !important;
+    padding: 1rem !important;
+    padding-right: 3.5rem !important;
+    margin: 1.5rem 0 !important;
     position: relative !important;
     font-family: 'Nightingale', Georgia, serif !important;
-    font-size: 1rem !important; /* Reduced from 1.3rem */
-    line-height: 1.5 !important; /* Slightly tighter line height */
-    color: #5A3E2B !important; /* Warm brown text color */
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    color: #5A3E2B !important;
     border-radius: 0 8px 8px 0 !important;
     box-shadow: 0 2px 8px rgba(255, 154, 60, 0.1) !important;
   }
 
   aside p {
-    margin: 0.5rem 0 !important; /* Even spacing above and below paragraphs */
+    margin: 0.5rem 0 !important;
   }
 
   aside p:first-child {
-    margin-top: 0 !important; /* Remove top margin from first paragraph */
+    margin-top: 0 !important;
   }
 
   aside p:last-child {
-    margin-bottom: 0 !important; /* Remove bottom margin from last paragraph */
+    margin-bottom: 0 !important;
   }
 
   aside::after {
@@ -123,7 +122,7 @@ const { title = "Twistinside" } = Astro.props;
     max-width: 700px;
     margin: 2rem auto;
     padding: 0 1rem;
-    margin-bottom: 6rem; /* Increased from 4rem to 6rem (50% larger) */
+    margin-bottom: 6rem;
   }
 </style>
 
@@ -131,9 +130,7 @@ const { title = "Twistinside" } = Astro.props;
   .home-article a {
     position: relative;
     color: #333;
-    /* Only transition color, not all properties */
     transition: color 0.25s ease-in-out;
-    /* Fix the position to prevent movement */
     transform-style: preserve-3d;
     backface-visibility: hidden;
   }
@@ -165,6 +162,4 @@ const { title = "Twistinside" } = Astro.props;
     transform: scaleX(1);
     transform-origin: left;
   }
-
-  /* Removing redundant home-article a:visited selector */
 </style>
