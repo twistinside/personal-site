@@ -2,7 +2,7 @@ name: Deploy Site
 
 on:
   push:
-    branches: [ main ]
+    branches: [ mainline ]
   workflow_dispatch:
 
 jobs:
