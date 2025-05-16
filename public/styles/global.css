@@ -75,11 +75,6 @@ body {
   color: #222;
 }
 
-/* Remove global transition that affects all elements */
-/* * {
-  transition: all 0.3s ease-in-out;
-} */
-
 /* Basic typography and element styling */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 300;

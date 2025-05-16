@@ -60,51 +60,10 @@ export async function getStaticPaths() {
     margin-bottom: 1.5rem;
   }
 
-  /* Fancy styling for aside tags */
-  .article-content aside {
-    background-color: #FFF3E6; /* Light orange background */
-    border-left: 4px solid #FF9A3C; /* Deeper orange border */
-    padding: 1.5rem;
-    margin: 2rem 0;
-    position: relative;
-    font-family: 'Nightingale', Georgia, serif;
-    font-size: 1.3rem;
-    line-height: 1.4;
-    color: #5A3E2B; /* Warm brown text color */
-    border-radius: 0 8px 8px 0;
-    box-shadow: 0 2px 8px rgba(255, 154, 60, 0.1);
-  }
+  /* Fancy styling for aside tags - removing redundant styling */
+  /* These styles are already defined globally in BaseLayout */
 
-  .article-content aside p {
-    margin-bottom: 0.8rem;
-  }
+  /* Removing redundant aside::before styling as it conflicts with global styling */
 
-  .article-content aside p:last-child {
-    margin-bottom: 0;
-  }
-
-  .article-content aside::before {
-    content: "✦"; /* Decorative element */
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    font-size: 1.2rem;
-    color: #FF9A3C;
-    opacity: 0.6;
-  }
-
-  .aside-note {
-    background: #f7e5cc;
-    border-left: 4px solid #d78f2b;
-    padding: 1rem;
-    margin: 2rem 0;
-    position: relative;
-  }
-
-  .aside-note .fox-icon {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    height: 40px;
-  }
+  /* Removing unused class */
 </style>
