@@ -26,7 +26,7 @@ public class HttpHandler implements RequestHandler<Request, Response> {
 
 The only code you write is the class that implements `RequestHandler` and any supporting code that object needs to function. The Java Lambda runtime provides all the networking code and object serialization required to handle requests. Under the hood, the runtime is making calls to Lambda APIs to poll for events; behavior that is abstracted away by the runtime code. But if you don't want to write Java Lambdas...
 
-## The Swift AWS Lambda Runtime
+## The Alternative
 
 While reading the list of provided runtimes linked above, two stand out: the OS only runtimes. To deploy a Swift lambda, you must use the AL2 runtime and perform all the tasks that were previously abstracted away. AWS doesn't provide the code needed to interface with the lambda service, but provides documentation for [the APIs](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html) that allow you to do the heavy lifting yourself.
 
