@@ -1,0 +1,68 @@
+---
+date: 2025-08-30
+title: The Swift AWS Lambda Runtime
+description: What you need to know about AWS Lambda Runtimes to create a Swift Lambda.
+---
+
+When we talk about Lambda runtimes and running Swift code in Lambda, it helps to start by understanding what a traditional Lambda implementation looks like. Selecting a provided runtime provides a scaffolding for your code to hook into that does the heavy lifting required for Lambda to function.
+
+<aside>
+Available AWS runtimes are listed in a [developer guide](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html) if you want to see the full list.
+</aside>
+
+When providing a Java Lambda implementation, for example, you write a class that is typed to the `Request` and `Response` that your architecture will provide to and expect from the Lambda function respectively.
+
+```java
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+
+/**
+ * Lambda handler written in Java that receives HTTP requests and returns a response.
+ */
+public class HttpHandler implements RequestHandler<Request, Response> {
+  // perform logic on the request and return response
+}
+```
+
+The only code you write is the class that implements `RequestHandler` and any supporting code that object needs to function. The Java Lambda runtime provides all the networking code and object serialization required to handle requests. Under the hood, the runtime is making calls to Lambda APIs to poll for events; behavior that is abstracted away by the runtime code. But if you don't want to write Java Lambdas...
+
+## The Swift AWS Lambda Runtime
+
+While reading the list of provided runtimes linked above, two stand out: the OS only runtimes. To deploy a Swift lambda, you must use the AL2 runtime and perform all the tasks that were previously abstracted away. AWS doesn't provide the code needed to interface with the lambda service, but provides documentation for [the APIs](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html) that allow you to do the heavy lifting yourself.
+
+You would of course need to write an `HttpHandler` in Swift and any supporting code for that object, but you are also now responsible for the networking code and object serialization required to wire up that class with the Lambda service itself. This is what the [Swift AWS Lambda Runtime](https://github.com/swift-server/swift-aws-lambda-runtime) provides. It is a project that bridges that gap and makes Swift lambdas practical.
+
+<aside>
+Practical doesn't quite equate to *sensible*... There is an entirely separate conversation about which workflows Swift on Lambda would shine in, and I would summarize my thoughts by saying unless your workload is asynchronous and compute heavy, then JS, Python, or even Java are likely more justifiable alternatives in a production environment. Or switch to ECS, where Swift's strengths are highlighted.
+</aside>
+
+In contrast with the Java lambda, we are providing a main method for the runtime, which was notably absent in the Java example. Our code is responsible for the entire workflow and is loaded directly when the OS only runtime boots!
+
+```
+import AWSLambdaRuntime
+
+/// Lambda handler written in Swift that receives HTTP requests and returns a response.
+@main
+struct HttpHandler: LambdaHandler {
+
+  func handle(_ event: Request, context: LambdaContext) async throws -> Response {
+    // perform logic on the request and return response
+  }
+}
+```
+
+The elegance of the Swift AWS Lambda Runtime is encapsulated in the `@main` annotation on the `LambdaHandler`.
+
+## A Beautiful Abstraction
+
+Aside from having to learn slightly more about the inner workings of a Lambda runtime, once you import and use the Swift AWS Lambda Runtime in your package there is not a significant practical difference in what you're coding. The runtime is provided by the implementation of `main` that the Lambda Runtime package provides. When your class implements `SimpleLambdaHandler` or `LambdaHandler`, an extension on those classes provides a main that calls the Lambda runtime loop that integrates your lambda code.
+
+It's a very clean abstraction for a huge amount of boilerplate code that you would otherwise have to write. When compared to the AWS provided runtime implementations, the work required for a Swift developer is nearly identical despite the increased complexity behind the scenes.
+
+## Diving Deeper
+
+To explore Swift on Lambda, I wrote a small project that uses the Swift AWS Lambda runtime along with CDK to build and deploy multiple Lambda functions that back an API Gateway endpoint. The functions are built as separate products using Swift Package Manager while sharing common code provided by a third SPM package in the same repository. You can view the [source code](https://github.com/twistinside/torpin/tree/main) on GitHub.
+
+<aside>
+Take a second to visit [the site](https://isbriantorp.in) now that you've perused the source.
+</aside>
