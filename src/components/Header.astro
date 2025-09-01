@@ -28,7 +28,7 @@
 
   .logo {
     font-family: 'Nightingale', Georgia, serif;
-    font-size: 8.5rem;
+    font-size: clamp(3rem, 15vw, 8.5rem);
     font-weight: 300;
     margin: 0;
     padding: 0;
@@ -56,11 +56,6 @@
   }
 
   @media (max-width: 768px) {
-    .logo {
-      font-size: 5.25rem;
-      bottom: -0.25em;
-    }
-    
     .site-header {
       padding: 8rem 2rem 0;
       height: 12rem;
