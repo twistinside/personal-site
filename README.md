@@ -1,4 +1,4 @@
-# Personal Site
+# My Website
 
 [![Deploy Site](https://github.com/twistinside/personal-site/actions/workflows/deploy.yml/badge.svg)](https://github.com/twistinside/personal-site/actions/workflows/deploy.yml)
 
