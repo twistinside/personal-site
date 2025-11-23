@@ -42,12 +42,13 @@ jobs:
           REF_NAME: ${{ github.ref_name }}
           GIT_SHA: ${{ github.sha }}
         run: |
+          short_sha="${GIT_SHA:0:8}"
           if [ "${JOB_STATUS}" = "success" ]; then
             title="Twistinside deployment"
-            message="Deployment complete for ${REF_NAME} @ ${GIT_SHA}"
+            message="Deployment complete. Site is now at ${short_sha}."
           else
             title="Twistinside deployment failed"
-            message="Deployment failed for ${REF_NAME} @ ${GIT_SHA}. Check logs."
+            message="Deployment failed for ${short_sha}. Check logs."
           fi
           curl -s \
             --form-string "token=${PUSHOVER_TOKEN}" \
