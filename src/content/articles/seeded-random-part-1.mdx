@@ -1,0 +1,92 @@
+---
+date: 2025-11-23
+title: Seeded Random Number Generation, part 1
+description: An introduction to seeded random number generation.
+---
+Randomness is relatively easy to come by in Swift. Most types you might want to randomize support the method `random(in:)`, which takes a closed range and returns a value within the range. But there are use cases where you don't just want randomness, but *predictable* randomness. This is a concept called seeded randomness, where you provide a seed (in the form of a string, a number, or some bytes) to the data structure that provides your randomness. That seed ensures that all data structures will return the same string of randomness. Predictable randomness! This needs unpacking.
+
+## The Swift protocol
+Swift provides the protocol `RandomNumberGenerator` that requires implementation of one method:
+
+```
+func next() -> UInt64
+```
+
+This is the protocol we’ll focus our discussion on, with the following expansion:
+
+```
+protocol SeededRandomNumberGenerator: RandomNumberGenerator {
+    typealias Seed = UInt64
+
+    var seed: Seed { get }
+
+    init(seed: Seed)
+}
+```
+
+We will enforce an initializer that takes a seed in the form of `UInt64` and we expose it for examination. The rest of our discussion will focus on the implementation of the `next` method in this protocol.
+
+## The use case
+
+Generally, the reason you're reaching for a random number is that you *don't* want predictability, but there are use cases where you want the *impression* of randomness without the problems that actual randomness introduces. 
+
+Perhaps the most universal reason to reach for seeded randomness is testing. While in production, randomness may  be essential to proper function of your app or service, but in testing determinism is paramount. Instead of reaching for `random(in:)`, you can inject `any RandomNumberGenerator` into your class. In production code, you can use the `SystemRandomNumberGenerator` provided by Swift. In test, you can provide a `SeededRandomNumberGenerator` to provide determinism.
+
+What got *me* interested in seeded random number generation is its use in games. It's common for terrain in a game to be randomly generated as players explore. How do you ensure that two players on the same map generate the same random terrain? Seeded random number generation! How do you allow players to share maps and starting points with each other? You can generate and share the entire map, or you can implement seeding and just share the seed.
+
+<aside>
+Another cool side effect of using seeds to generate gameplay elements or maps is that players can find seeds that produce exceptional outcomes and share them with each other. Look no farther than [r/balatro_seeds](https://www.reddit.com/r/Balatro_Seeds/) and [r/minecraftseeds](https://www.reddit.com/r/minecraftseeds/) to see what I mean.
+</aside>
+
+## Our first attempt
+
+We’ll call this our incremental random.
+
+```
+///  It would be challenging to come up with a *more basic* generator.
+struct IncrementalRandom: SeededRandomNumberGenerator {
+    typealias Seed = UInt64
+
+    private var state: Seed
+
+    public let seed: Seed
+
+    init(seed: Seed) {
+        self.seed = seed
+        self.state = seed
+    }
+
+    mutating func next() -> UInt64 {
+        state &+= 1
+        return state
+    }
+}
+```
+
+It accepts a seed, then when next is called it increments the state by one and returns that value. When it reaches the maximum value of a `UInt64` it wraps around and begins at zero. While it may fail our intuitive understanding of a random number generator, it actually passes a surprising number of tests for a random number generator, and we’ll start our discussion with those.
+
+<aside>
+We use overflow operators to ensure that when (for example) we add one to the max value of `UInt64` we go back to zero. This ensures that we have well defined behavior for our random number generator, and you’ll see it in all the implementations we’ll look at. Overflow operators exist for `+`, `-`, and `*`, and are `&+`, `&-`. and `&*` respectively. We're using the combined overflow addition assignment operator, which also has counterparts for subtraction and multiplication. You can read more at [docs.swift.org](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/advancedoperators/#Overflow-Operators).
+</aside>
+
+## Determinism
+
+The most important quality of a seeded random number generator is that for a given seed, the values returned are the the same every time and in the same order. For `IncrementalRandom`, it’s easy to see that for a seed `x`, the returned values will be `x+1`, `x+2`, and so on. This is the core competency of the seeded random number generator.
+
+## Periodicity
+
+Periodicity refers to the number of calls to next required until the random number sequence repeats. Generally, the goal is to maximize the size of the period. For `UInt64`, our period can be as large as the max value of `UInt64`. We can also validate this pretty intuitively for our `IncrementalRandom` seeded generator… It won’t repeat a value until it passes through the entire space of `UInt64` and returns to our seed. This is as good as it gets for periodicity, and so far it seems like our simple implementation is doing kind of well, but that won't last. We’ll start to examine its shortcomings next.
+
+## Predictability
+
+Intuitively, I’m sure you can already tell that our random number generator fails at this aspect of its task… A seeded random number generator is never truly random, but the numbers need to *feel* random. For `IncrementalRandom`, this failure manifests itself when you can tell for any given random value what the next in the sequence is. When the predictability is this obvious, it’s easy to understand the algorithm’s shortcoming, but as we increase in complexity, what we mean by predictability will get harder to intuit.
+
+<aside>
+Predictability doesn’t just mean that you can fully predict the next or previous values, it refers to any clues that may lead to a leakage of internal structure. This can refer to uniformity of distribution, correlation between numbers in the sequence, and whether some numbers appear more frequently than others. In short order for our discussion determining predictability will require statistical evaluation. There are tools that will do this for any algorithm you’d like to test. [Dieharder](https://en.wikipedia.org/wiki/Diehard_tests) and [TestU01](https://en.wikipedia.org/wiki/TestU01) are two examples.
+</aside>
+
+As an metric, we want predictability to be low. In a game, this is what will make a river's flow look natural, and prevent mountain ranges from having peaks that decrease in height from east to west. In a non-game scenario, if you're using a random number generator to assign work tasks to agents, predictability (as manifested by correlation) coould be seen in the system as some agents getting assigned more or fewer tasks than others, or some agents often getting assigned tasks after others. Whether or not this is a big deal relates to how important true randomness is to your app.
+
+## To be continued
+
+We can do much better than `IncrementalRandom`, but it was a useful way to introduce topics in a way that can be intuited. We will look deeper at these concepts in part 2.
