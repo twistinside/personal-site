@@ -6,13 +6,14 @@ import Footer from '../components/Footer.astro';
 const {
   title = "Twistinside",
   description,
+  ogType = "website",
 } = Astro.props;
 
 const fallbackDescription = "Twistinside is Karl Groff's space for writing on software, Swift, and more.";
 const pageDescription = description ?? fallbackDescription;
 const site = Astro.site ?? new URL('https://twistinsi.de');
 const ogImage = new URL('/og-image.jpg', site).toString();
-const canonicalUrl = Astro.request?.url?.href ?? site.toString();
+const canonicalUrl = Astro.url?.href ?? site.toString();
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -23,7 +24,7 @@ const canonicalUrl = Astro.request?.url?.href ?? site.toString();
     <meta name="description" content={pageDescription} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={pageDescription} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />

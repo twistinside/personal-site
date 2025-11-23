@@ -29,7 +29,7 @@ export async function getStaticPaths() {
 }
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
+<BaseLayout title={post.data.title} description={post.data.description} ogType="article">
   <article class="blog-article">
     <h2>{post.data.title}</h2>
     <p class="article-date">{formatDate(post.data.date)}</p>
