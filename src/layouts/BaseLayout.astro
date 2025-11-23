@@ -9,7 +9,7 @@ const {
   ogType = "website",
 } = Astro.props;
 
-const fallbackDescription = "Twistinside is Karl Groff's space for writing on software, Swift, and more.";
+const fallbackDescription = "Twistinside is my space for writing on software, Swift, and more.";
 const pageDescription = description ?? fallbackDescription;
 const site = Astro.site ?? new URL('https://twistinsi.de');
 const ogImage = new URL('/og-image.jpg', site).toString();
