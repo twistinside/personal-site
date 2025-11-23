@@ -2,7 +2,17 @@
 import Header from '../components/Header.astro';
 import SiteNav from '../components/SiteNav.astro';
 import Footer from '../components/Footer.astro';
-const { title = "Twistinside" } = Astro.props;
+
+const {
+  title = "Twistinside",
+  description,
+} = Astro.props;
+
+const fallbackDescription = "Twistinside is Karl Groff's space for writing on software, Swift, and more.";
+const pageDescription = description ?? fallbackDescription;
+const site = Astro.site ?? new URL('https://twistinsi.de');
+const ogImage = new URL('/og-image.jpg', site).toString();
+const canonicalUrl = Astro.request?.url?.href ?? site.toString();
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -10,6 +20,20 @@ const { title = "Twistinside" } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <meta name="description" content={pageDescription} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Twistinside preview image" />
+    <meta property="og:site_name" content="Twistinside" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImage} />
     <script defer src="https://cloud.umami.is/script.js" data-website-id="a4cb3ff5-5215-4b1c-8f5c-4d8c3e3d5fe1"></script>
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />

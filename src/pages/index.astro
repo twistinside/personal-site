@@ -14,7 +14,7 @@ function formatDate(date: Date) {
   }).format(date);
 }
 ---
-<BaseLayout>
+<BaseLayout description="Latest writing by Karl Groff on software, Swift, and more.">
   <div class="home-articles">
     {latestFive.map(async (article, index) => {
       const { Content } = await article.render();
