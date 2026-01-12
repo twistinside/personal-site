@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
-    "astro": "^5.16.6",
+    "astro": "^5.16.8",
     "remark-directive": "^4.0.0"
   },
   "devDependencies": {
