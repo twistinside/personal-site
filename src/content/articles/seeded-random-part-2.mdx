@@ -1,0 +1,172 @@
+---
+date: 2026-01-10
+title: Seeded Random Number Generation, part 2
+description: An introduction to seeded random number generation continued.
+---
+Once we have the interface for our `SeededRandomNumberGenerator` and a very naïve implementation in place, the reasonable question to ask is "How do we make this better?" If you recall from [part 1 of this discussion](/articles/seeded-random-part-1/), the naive implementation actually does well at a number of qualities we expect of a random number generator, namely determinism and periodicity (insofar as it's predictable and uses the whole number space). Where it falls short is in predictibility. We will spend our time here discussing how to improve the predictibility of our generator.
+
+## Linear Congruential Random
+
+The linear congruential generator represents the first real step up from the trivial incrementing generator. It introduces feedback (each output depends on the previous one), but not enough nonlinearity to be suitable for high-quality randomness.
+
+```swift
+struct LinearCongruentialRandom: SeededRandomNumberGenerator {
+    typealias Seed = UInt64
+
+    private let a: UInt64 = 6364136223846793005
+    private let c: UInt64 = 1
+
+    private var state: Seed
+
+    public let seed: Seed
+
+    init(seed: Seed) {
+        self.seed = seed
+        self.state = seed
+    }
+
+    mutating func next() -> UInt64 {
+        state = state &* a &+ c
+        return state
+    }
+}
+```
+
+This is a much better generator, while still being very fast. It has the key quality of a seeded random number generator, that it will produce the same values give the same seed. And its period is high, as it covers the entire number space of the seed (with the right values for `a` and `c`). Recall the problem with the incremental random number generator: you could predict the next number from the current number. While that's not entirely true with this generator, take a look at this string of ten outputs.
+
+```
+0110111101100000010100011100001111001011110101000001101010100000
+0111111001000000010010100000010000001100100111100000111000100001
+0000101111010000001110001111010110100101111111111101101011001110
+1000100111010001010000011001110110011101011010111010100000110111
+1101011001110110010011010001000101010000011000101101101010101100
+1100010000110000101001011001110010000001111101111100010000111101
+1000100001000111100101110010110100010110011010001100000110111010
+1101110101100011011010110011100011100001110001110101001110110011
+1101100101000000111110010101010101101101101111101000001101111000
+1001100000101110001000000111011111110010100011011010010000011001
+```
+
+If you examine the low bit, you can see that it flips between `1` and `0`. This is an example of an unitended pattern created by our implementation. This pattern creates predictibility. Given any number output by this generator, you could correctly predict the low bit. For some use cases this may not be a problem, but patterns the expose themselves in your random numbers can show up as patterns where you put them to use, such as commonly suggesting simliar passwords or terrain generation that has repetitive features.
+
+## Bit Mixing
+
+In a random number generator, patters are often the result of any particular bit being manipulated a small number of times. In the Linear Congruential generator, each bit is multiplied by a large odd number. This is a small amount of manipulation for each bit, and the manipulation comes from a static source, the property `c`
+
+<aside>
+We also add 1 during each iteration. This prevents the seed `0` from breaking the random number generator and ensures the generator never gets stuck in practice. Any odd number will work, but one is convention due to its simplicity.
+</aside>
+
+If the Linear Congruential algorithm has good randomness at higher bits but poorer at lower bits, what if we improved our generator by "borrowing" some of that high quality randomness?
+
+## XorShift64*
+
+The aptly named XorShift64* (pronounced ex or shift 64 star) introduces bit mixing throughout the length of the seed. The idea is that all bits have a chance to mix, with a focus on the high and lows mixing. There are three shift and xor combos. Together, they are meant to ensure high and low bit mix by moving information from low bits to the high position and vice verse through a series of shifts. After the shifts, we multiply by a constant just like in the Linear Congruential generator. All this shifting ensures that any pattern in high or low bits introduced by the multiply is erased, or at least heavily obfuscated.
+
+```swift
+struct XorShift64Star: SeededRandomNumberGenerator {
+    typealias Seed = UInt64
+
+    private let shift1: UInt64 = 12
+    private let shift2: UInt64 = 25
+    private let shift3: UInt64 = 27
+
+    private let multiplier: UInt64 = 2685821657736338717
+
+    private let alternate: UInt64 = 0x9E3779B97F4A7C15
+
+    public let seed: Seed
+
+    private var state: UInt64
+
+    /// Create a generator. If `seed == 0`, we remap to a fixed odd constant.
+    /// Seeding with zero produces only zero for the lifetime of the generator
+    init(seed: Seed) {
+        self.seed = seed
+        self.state = (seed == 0) ? alternate : seed
+    }
+
+    mutating func next() -> UInt64 {
+        var x = state
+        x ^= x >> shift1
+        x ^= x << shift2
+        x ^= x >> shift3
+        state = x
+        return x &* multiplier
+    }
+}
+```
+The shifts are chosen to ensure significant overlap between high and low bits, so they're a relatively large fraction of the seed size. The shift sizes don't match to avoid repeatedly shifting the same bits. These specific values are the values identified when the algorithm was created as empirically generating a good mix of full mixing and statistical properites.
+
+<aside>
+The constant 0x9E3779B97F4A7C15 is derived from the fractional part of the golden ratio. It’s often used in hash functions, Weyl sequences, and PRNG seeding because adding it repeatedly walks through the 64-bit space evenly, minimizing overlap and correlation between nearby seeds. Using it here ensures that even a zero seed is remapped to a well-dispersed, non-zero starting state. It’s a widely recognized "nothing-up-my-sleeve" constant providing good bit dispersion for initialization and indexing.
+</aside>
+
+## What's next?
+
+From this point, the algorithms we could implement get progressively better at bit mixing, generally by applying more and more complicated mixing strategies. I won't show implementation details for any more algorithms, but by now you should understand the general strategy a seeded random number generator can employ to do its job. There are a few noteworthy strategies that can be used to improve our approach, and I'll briefly touch on a few.
+
+## Inncreasing Internal State
+
+PCG64 increases the quality of random number generation by storing more state. It uses a 128 bit state seeded by generating two 64 bit random numbers using a separate set of bit mixing, using the first number as the low bits and the second as the high bits. This 128 bit number is then manipulated in a similar way to the generators we've examined, and we return 64 bits created from this state. The increased mixing provided by using a 128 bit state dramatically improves the quality of the generator, and actually means the period is be larger than the size of the seed.
+
+<aside>
+The mixing done to create the high and low bits for the state is often implemented as SplitMix64, which can itself be used as a random number generator. 
+</aside>
+
+## Increasing Mixing Steps
+
+Philox4x32_10 uses a similar state size as PCG64, but to increase quality it uses 10 rounds of mixing whenever the state is updated. The mixing used in each round is similar in complexity to our lower quality random number generators. This is one round of mixing in Philox4x32_10.
+
+```swift
+private mutating func round(
+    _ c: (UInt32, UInt32, UInt32, UInt32), key: (UInt32, UInt32)
+) -> (UInt32, UInt32, UInt32, UInt32) {
+    // 32x32 -> 64 multiplies (use 64-bit intermediates to extract hi/lo)
+    let p0 = UInt64(Self.m0) &* UInt64(c.0)
+    let p1 = UInt64(Self.m1) &* UInt64(c.2)
+    let lo0 = UInt32(truncatingIfNeeded: p0)
+    let hi0 = UInt32(truncatingIfNeeded: p0 >> 32)
+    let lo1 = UInt32(truncatingIfNeeded: p1)
+    let hi1 = UInt32(truncatingIfNeeded: p1 >> 32)
+
+    // Permutation + xors with key
+    let n0 = hi1 ^ c.1 ^ key.0
+    let n1 = lo1
+    let n2 = hi0 ^ c.3 ^ key.1
+    let n3 = lo0
+    return (n0, n1, n2, n3)
+}
+```
+
+Despite the increased number of rounds, this algorithm is still very fast. Taking it one step further, the ChaCha20 algorithm increases the mixing to 20 rounds, while also increasing complexity of overall stored state. ChaCha20 performs 8 quarter rounds each loop for 10 loops, leading to 20 total rounds of high quality mixing. This algorithm is the only crytographically acceptible one I've discussed, and is much slower than the rest.
+
+```swift
+private mutating func generateBlock() {
+    var x = state
+    for _ in 0..<10 {
+        qround(&x, 0, 4, 8, 12)
+        qround(&x, 1, 5, 9, 13)
+        qround(&x, 2, 6, 10, 14)
+        qround(&x, 3, 7, 11, 15)
+        qround(&x, 0, 5, 10, 15)
+        qround(&x, 1, 6, 11, 12)
+        qround(&x, 2, 7, 8, 13)
+        qround(&x, 3, 4, 9, 14)
+    }
+    for i in 0..<16 { block[i] = x[i] &+ state[i] }
+    state[12] &+= 1
+    index = 0
+}
+
+private func qround(_ x: inout [UInt32], _ a: Int, _ b: Int, _ c: Int, _ d: Int) {
+    x[a] &+= x[b]; x[d] ^= x[a]; x[d] = rotl(x[d], 16)
+    x[c] &+= x[d]; x[b] ^= x[c]; x[b] = rotl(x[b], 12)
+    x[a] &+= x[b]; x[d] ^= x[a]; x[d] = rotl(x[d], 8)
+    x[c] &+= x[d]; x[b] ^= x[c]; x[b] = rotl(x[b], 7)
+}
+```
+
+## Just the Beginning
+
+This discussion is meant as the briefest of introductions to the subject of seeded random number generators. I hope though that it provides enough information to have some basic grasp of the uses of seeded random number generators, what properties belong in a discussion of their quality, and what levers we have available to adjust those properties. 
