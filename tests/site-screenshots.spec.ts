@@ -20,6 +20,7 @@ const screenshotRoutes = [
 ] as const;
 
 async function loadPage(page: Page, path: string) {
+  await page.route('https://cloud.umami.is/**', (route) => route.abort());
   await page.goto(path);
   await page.waitForLoadState('networkidle');
   await page.evaluate(async () => {
