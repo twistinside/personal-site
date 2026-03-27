@@ -1,6 +1,7 @@
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import { experimental_AstroContainer } from 'astro/container';
 import mdxRenderer from '@astrojs/mdx/server.js';
+import { getArticleSlug } from '../utils/articleSlug';
 
 export async function GET(context) {
   const site = context.site ?? 'https://twistinside.com';
@@ -13,9 +14,9 @@ export async function GET(context) {
     articles
       .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
       .map(async (article) => {
-        const url = new URL(`/articles/${article.slug}/`, site);
+        const url = new URL(`/articles/${getArticleSlug(article)}/`, site);
 
-        const { Content } = await article.render();
+        const { Content } = await render(article);
         const html = await container.renderToString(Content);
 
         return `    <item>\n` +
@@ -45,4 +46,3 @@ export async function GET(context) {
     },
   });
 }
-

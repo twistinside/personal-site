@@ -1,16 +1,17 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getArticleSlug } from '../../utils/articleSlug';
 
 const { slug } = Astro.params;
 const articles = await getCollection('articles');
-const post = articles.find((a) => a.slug === slug);
+const post = articles.find((a) => getArticleSlug(a) === slug);
 
 if (!post) {
   throw new Error(`Post not found for slug: ${slug}`);
 }
 
-const { Content } = await post.render();
+const { Content } = await render(post);
 
 // Function to format date as "Month Day, Year"
 function formatDate(date) {
@@ -24,7 +25,7 @@ function formatDate(date) {
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
   return articles.map((article) => ({
-    params: { slug: article.slug },
+    params: { slug: getArticleSlug(article) },
   }));
 }
 ---
