@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { formatShortDate } from '../utils/formatDate';
 import { getArticleSlug } from '../utils/articleSlug';
 
 const articles = await getCollection('articles');
@@ -13,7 +14,7 @@ const sorted = articles.sort((a, b) => new Date(b.data.date).getTime() - new Dat
   <ul class="archive-list">
     {sorted.map(article => (
       <li>
-        <span class="archive-date">{article.data.date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}</span>
+        <span class="archive-date">{formatShortDate(article.data.date)}</span>
         <div class="archive-entry">
           <a href={`/articles/${getArticleSlug(article)}`}>{article.data.title}</a>
           {article.data.description && <p class="archive-description">{article.data.description}</p>}

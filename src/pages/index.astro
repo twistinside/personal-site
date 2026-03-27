@@ -1,19 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
+import { formatLongDate } from '../utils/formatDate';
 import { getArticleSlug } from '../utils/articleSlug';
 
 const articles = await getCollection('articles');
 const sorted = articles.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 const latestFive = sorted.slice(0, 5);
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(date);
-}
 ---
 <BaseLayout description="Latest writing on software, Swift, and more.">
   <div class="home-articles">
@@ -23,7 +16,7 @@ function formatDate(date: Date) {
         <article class="home-article">
           <header>
             <h2><a href={`/articles/${getArticleSlug(article)}`}>{article.data.title}</a></h2>
-            <p class="article-date">{formatDate(article.data.date)}</p>
+            <p class="article-date">{formatLongDate(article.data.date)}</p>
           </header>
           <div class="article-content">
             <Content />
