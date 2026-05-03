@@ -22,6 +22,7 @@ const canonicalUrl = Astro.url?.href ?? site.toString();
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={pageDescription} />
+    <meta name="theme-color" content="#000000" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:type" content={ogType} />
@@ -51,6 +52,11 @@ const canonicalUrl = Astro.url?.href ?? site.toString();
     <style>
       html {
         visibility: hidden;
+        background-color: #000;
+      }
+
+      body {
+        background-color: #000;
       }
       
       /* Add critical font styles to prevent FOUC */
@@ -97,11 +103,51 @@ const canonicalUrl = Astro.url?.href ?? site.toString();
   </head>
   <body>
     <Header />
-    <SiteNav />
-    <main class="site-main">
-      <slot />
-    </main>
-    <Footer />
+    <div class="site-page-surface">
+      <SiteNav />
+      <main class="site-main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+    <script>
+      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+      const siteHeader = document.querySelector('.site-header');
+
+      if (themeColorMeta && siteHeader) {
+        const darkThemeColor = '#000000';
+        const lightThemeColor = '#ffffff';
+        let pendingFrame = 0;
+
+        const updateThemeColor = () => {
+          pendingFrame = 0;
+          const nextChrome = siteHeader.getBoundingClientRect().bottom > 0
+            ? 'dark'
+            : 'light';
+          const nextColor = nextChrome === 'dark' ? darkThemeColor : lightThemeColor;
+
+          if (themeColorMeta.getAttribute('content') !== nextColor) {
+            themeColorMeta.setAttribute('content', nextColor);
+          }
+
+          if (document.documentElement.dataset.browserChrome !== nextChrome) {
+            document.documentElement.dataset.browserChrome = nextChrome;
+          }
+        };
+
+        const scheduleThemeColorUpdate = () => {
+          if (pendingFrame) {
+            return;
+          }
+
+          pendingFrame = window.requestAnimationFrame(updateThemeColor);
+        };
+
+        updateThemeColor();
+        window.addEventListener('scroll', scheduleThemeColorUpdate, { passive: true });
+        window.addEventListener('resize', scheduleThemeColorUpdate);
+      }
+    </script>
   </body>
 </html>
 
@@ -154,6 +200,10 @@ const canonicalUrl = Astro.url?.href ?? site.toString();
     margin: 2rem auto;
     padding: 0 1rem;
     margin-bottom: 6rem;
+  }
+
+  .site-page-surface {
+    background: #fff;
   }
 </style>
 

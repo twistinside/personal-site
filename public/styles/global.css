@@ -66,12 +66,18 @@
 html, body {
   margin: 0;
   padding: 0;
+  background-color: #000;
+  transition: background-color 220ms ease-out;
+}
+
+html[data-browser-chrome="light"],
+html[data-browser-chrome="light"] body {
+  background-color: #fff;
 }
 
 body {
   font-family: 'Sentient', 'Georgia', serif;
   font-weight: 300;
-  background-color: #fff;
   color: #222;
 }
 
@@ -102,4 +108,10 @@ hr {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html, body {
+    transition: none;
+  }
 }
