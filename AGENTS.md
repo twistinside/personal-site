@@ -10,6 +10,7 @@
 - `src/pages/`: route files.
 - `src/layouts/`: shared page layout.
 - `src/components/`: reusable Astro components.
+- `src/styles/`: global and prose/code CSS bundled by Astro.
 - `src/content/articles/`: article content in `.mdx`.
 - `public/`: static assets, including self-hosted fonts and images.
 - `tests/`: Playwright screenshot specs and committed snapshot baselines.

@@ -55,6 +55,7 @@ Key folders you’ll interact with:
 - `src/pages/`: Individual pages, including the homepage.
 - `src/layouts/`: Shared page layouts and wrappers.
 - `src/components/`: Shared Astro components.
+- `src/styles/`: Global, article, and code block CSS bundled by Astro.
 - `src/content/articles/`: Article content written in MDX.
 - `public/`: Static assets that are served as-is.
 - `tests/`: Playwright screenshot tests and snapshot baselines.
