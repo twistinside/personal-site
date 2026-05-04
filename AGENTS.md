@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Project Overview
-- Static personal site built with Astro 6.
+- Static personal writing site built with Astro 6.
 - Package manager: `npm`.
 - Node runtime target: 22.x or newer.
 - Main branch: `mainline`.
@@ -26,6 +26,7 @@
 - Always run `npm run build` after meaningful code changes.
 - If a change affects visual output on tracked pages, run `npm run test:screenshots`.
 - If the visual change is intentional, update baselines with `npm run test:screenshots:update` and commit the changed snapshot files.
+- Adding or changing article content can affect the `/` and `/archive` snapshots even when the article route itself is not directly covered.
 
 ## Screenshot Test Notes
 - Current screenshot coverage includes:
@@ -41,6 +42,7 @@
   - build on Ubuntu
   - screenshot tests on macOS
 - Pushes to `mainline` trigger deployment.
+- Deployment uploads the built `dist/` output to Porkbun via FTP.
 
 ## Editing Guidance
 - Prefer minimal, targeted changes.

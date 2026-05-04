@@ -1,13 +1,18 @@
-# My Website
+# Twistinside
 
 [![Deploy Site](https://github.com/twistinside/personal-site/actions/workflows/deploy.yml/badge.svg)](https://github.com/twistinside/personal-site/actions/workflows/deploy.yml)
 
-A simple Astro-powered personal website that highlights projects, shares a bit about me, and links out to the places I’m active online. The goal is to keep the experience fast, accessible, and easy to maintain.
+Twistinside is a static personal writing site built with Astro. It publishes articles, an archive, and a short about page while keeping the implementation small, fast, and easy to maintain.
+
+## Requirements
+- Node.js 22.x or newer.
+- npm.
 
 ## Features
 - Built with [Astro](https://astro.build) for static-first performance.
-- Minimal styling focused on readability and quick loading.
-- Easily extendable content structure for adding new pages or sections.
+- MDX article content under `src/content/articles/`.
+- Self-hosted fonts and static assets from `public/`.
+- Playwright screenshot coverage for key pages.
 
 ## Getting Started
 1. Install dependencies: `npm install`
@@ -34,6 +39,8 @@ If you intentionally change the visual output of one of those pages, update the 
 npm run test:screenshots:update
 ```
 
+Adding or changing articles can also affect the `/` and `/archive` snapshots because those pages render article metadata and recent article content.
+
 For a normal local verification pass before opening a PR, run:
 
 ```bash
@@ -47,8 +54,10 @@ The PR workflow also runs the screenshot suite on GitHub Actions, so a visual re
 Key folders you’ll interact with:
 - `src/pages/`: Individual pages, including the homepage.
 - `src/layouts/`: Shared page layouts and wrappers.
+- `src/components/`: Shared Astro components.
+- `src/content/articles/`: Article content written in MDX.
 - `public/`: Static assets that are served as-is.
 - `tests/`: Playwright screenshot tests and snapshot baselines.
 
 ## Deployment
-The site is automatically built and deployed via GitHub Actions (see the badge above). Push changes to the default branch to trigger a fresh build and deploy.
+The site is automatically built and deployed via GitHub Actions (see the badge above). Pull requests to `mainline` run the build and screenshot suites. Pushes to `mainline` build the site and upload `dist/` to Porkbun via FTP.
