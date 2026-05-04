@@ -1,0 +1,118 @@
+---
+date: 2026-05-04
+title: Single Instruction Multiple Data
+description: Speeding up math with a data structure that helps your CPU do more.
+---
+
+When math is your bottleneck, maybe when calculating the position of thousands of objects in a game engine or doing physics calculations, you want your math to process as quickly as possible. One of my mantras is that you're not going to be smarter than your compiler, so I don't generally advocate for optimizing math operations, loops, and other data structures before they prove themselves an issue, but that doesn't mean you shouldn't understand how the compiler is helping you and what tools you have available to help it along. One of those tools is Single Instruction Multiple Data, or SIMD.
+
+<aside>
+Apple has a `SIMD` protocol, along with a number of concrete types that implement it. The most commonly used concrete types, at least for geometry and physics, are `SIMD3` and `SIMD4`. You can find the protocol and concrete types at [Apple's Developer Documentation](https://developer.apple.com/documentation/swift/simd).
+</aside>
+
+## What is SIMD?
+
+SIMD allows the processor to perform the same operation on multiple values a the same time. At its highest level, it refers to the architecture and instructions that enable a CPU to perform SIMD operations. While it's not strictly necessary, discussing CPU structure is helpful to understanding why SIMD is so valuable.
+
+When a CPU does math, it has to load the operands and operation into registers. Registers are tiny ammounts of storage directly on the CPU, and are the only place in your computer where work actually gets done. So to multiply 3 and 5, the CPU would load 3 into one register, 5 into another register, and lastly the instruction for multiply would also be loaded. Finally, the result will be output to a register (either one of the orignal two or a third, depending on the logic), and that result will either continue to have operations performed on it or be moved back to RAM.
+
+<aside>
+This very high level overview just barely touches on the [Von Neumann architecture](https://en.wikipedia.org/wiki/Von_Neumann_architecture), which all major modern computers use. It is named after its creator, Johnny Von Neumann, who has been described as the smartest man to ever live by his peers and is responsible for this eponymous architecture, game theory, and innumerable mathematical and physics breakthroughs.
+</aside>
+
+Registers, despite being very small by storage standards, are still large enough to contain more than one number. You can imagine then, if we want to multiply 3 by 5, but also multiple 7 by 2, we could try moving *both* 3 and 5 into one register, and *both* 7 and 2 into the other, we would now have the "multiple data" part of SIMD in place. We can then apply a special multiply instruction that understands how to multiply two numbers at once, and 15 and 14 would be written to the last register.
+
+The last piece is to understand that when your CPU asks for a chunk of data, it can ask for enough bytes to fill a register at once, *as long as the data is contiguous in RAM*. Only if 3 and 5 are right next to each other in RAM can register one efficiently be populated with both values, and the same has to be true for 7 and 2. Finally, the data type being written to would also have to be contiguous to enable SIMD operations.
+
+## SIMD in Practice
+
+ Let's look at a situation where we might use SIMD. Taking the example of a location in 3D space, it would be reasonable to store the data as `x`, `y`, and `z` properties in a struct.
+
+```swift
+struct Position {
+    let x: Float
+    let y: Float
+    let z: Float
+}
+```
+
+These values are referred to as scalar values. Scalar means when a single value is used to represent a single concept. When using scalar values, there is no guarantee that `x`, `y`, and `z` are stored in a contiguous area of RAM. As we learned, if they aren't stored contiguously we cannot take advantage of SIMD instructions. The alternative to scalar values that addresses the contiguous storage requirement is vector storage. Vectors are contiguous areas of RAM that store a single data type, and in Swift, `SIMD` is the data type for vector storage of values.
+
+<aside>
+If you are familiar with C or C++, you may already be familiar with vectors, but the term is less common in the Swift community.
+</aside>
+
+Using `SIMD` is straightforward, though you must choose a specific concrete implementation type that will define the number of values in the vector storage. The most commonly used values are `SIMD3` and `SIMD4`, which can be used to represent 3D coordinates in space or XYZW cooridnates, RGB or RGBA color. Those use cases are so common that you can access the underlying values of `SIMD3` using `.x`, `.y`, and `.z` for `SIMD3`, and additionally `.w` for `SIMD4`. You can convert the scalar representation to a vector representation and maintain the dot notation for `x`, `y`, and `z` with minimal additional code.
+
+```swift
+struct Position {
+    let position: SIMD3<Float>
+    
+    var x: { position.x }
+    var y: { position.y }
+    var z: { position.z }
+}
+```
+
+## When to Use SIMD
+
+We've seen that it's easy to modify your code to use `SIMD` data structures, but we haven't really seen what that *means*. When is it appropriate to use `SIMD` in your code? My default answer is always to wait until it presents an issue in your code, then consider if a data structure like `SIMD` can help unblock hot paths. But we can still talk about what kinds of hot paths are right for `SIMD`.
+
+### The Hard Rules
+
+There are three hard requirements before we get to questions requiring engineering judgement.
+1. The data must all have the same type; the `SIMD` implementations are generic over a single data type.
+1. The data must be passed by value to reap the benefits of contiguous memory access, because data passed by reference require an additional trip to the heap to access the data they contain. This is true for all properties of the type as well, they can't be reference types either. 
+1. The entirety of the type must be small enough to fit in a register at least twice. Registers have limited sizes, so if you want to perform the same operation on two pieces of data in one register, you need to be able to fit them both into that one register. Your speed up from using `SIMD` will be related to how many times your data can fit in a register.
+
+<aside>
+For an example of that last point, my MacBook Pro has vector registers that are 64 bytes wide. That means they perfectly fit a `SIMD4<Float>`, a `SIMD2<Double>`, or a `SIMD16<Int8>`. This is a slight spoiler for the benchmarks I'll talk about later.
+</aside>
+
+### The Judgement Call
+
+Once you've cleared those hurdles, the first real question to ask is "is the data actually well represented by a contiguous chunk of memory?" In other words, will you generally be using all the data when you're using one of them? Position, rotation, velocity, color, normals... Many representations of the three dimensional physical world we inhabit are excellent candidates. It's not often that you only need to know the `x` coordinate of an object, or just the green channel, you'll be manipulating all at once. Using SIMD means that instead of fetching or writing three small numbers from memory, all of them can be loaded at once. The ease of copying and accessing continguous memory will also make explicit copies or buffer creation faster. 3D rendering is probably the most common use case for needing to create and manipulate buffers.
+
+## Benchmarking SIMD
+
+My hypothesis going into this article was that `SIMD` would provide significant increase in speed over scalar operations in all use cases. My thinking was that if I can ask my computer to do three or four times the work in the same amount of time I was asking it to do one operation, I'll always come out on top. I wanted to test this hypothesis though, so I put together a benchmarking tool to help me investigate.
+
+### Initial Results
+
+In each case, the scalar code beat the `SIMD` code, sometimes by *a lot*. It turns out that the LLVM compiler is incredibly good at optimizing looped scalar arithmetic operations! Optimized scalar operations were about 10% faster than the same operations using Swift's `SIMD` types. Swift's `SIMD16` and `SIMD32` types seem to not provide any benefit from `SIMD` operations at all, and saw *extreme* slowdown. In each case they are more than a few orders of magnitude slower.
+
+<aside>
+You can find my benchmarking tool along with all my results on [GitHub](https://github.com/twistinside/SIMDvsScalar). I am not a benchmarking expert. Codex wrote the tool with my input, and I learned a lot while we worked on it. I'm not sure whether it's implicit at this point that we all use GenAI to write code now... When the first IDEs were released, were coders compelled to admit that they used one to develop their newest creations? 
+</aside>
+
+After this lesson in how good modern compilers are, I rewrote the tool to remove compiler optimization from the scalar path. This doesn't represent real-world use cases, but it does give us a tool for comparison.
+
+### Float
+
+The first `SIMD` test run we can look at is `Float`. Performing two calculations at once with `SIMD2` doubles the speed of the calculations. This happens again when we jump to `SIMD4`. That's the final speed increase we get though, as we've saturated the register width. Any additional attempts at speed up will not work.
+
+| Width | Scalar | SIMD | Speedup |
+|:---|---:|---:|---:|
+| SIMD2 | 25.93 | 12.50 | 2.07x |
+| SIMD4 | 25.91 | 6.27 | 4.13x |
+| SIMD8 | 26.27 | 6.16 | 4.26x |
+| SIMD16 | 26.08 | 6.46 | 4.03x |
+
+### Int8
+
+The second test run we'll look at is `Int8`. While `Float` is 32 bits wide, `Int8` is only 8 bits wide. This means we have more headroom to improve performance using the smaller data type using `SIMD`. We see a speedup through `SIMD16`.
+
+| Width | Scalar | SIMD | Speedup |
+|:---|---:|---:|---:|
+| SIMD2 | 23.10 | 19.45 | 1.19x |
+| SIMD4 | 23.59 | 7.89 | 2.99x |
+| SIMD8 | 23.31 | 3.06 | 7.60x |
+| SIMD16 | 23.32 | 1.49 | 15.58x |
+
+### Compiler Optimization
+
+I touched on it briefly in the introduction, but you should never underestimate the compiler. For the benchmark, without forcing the compiler to leave the code unoptimized, the scalar impementation was dramatically faster than the `SIMD` implementation. The compiler can be better or worse at optimizing your work load, so actually testing is very important. The benchmark also runs reduction operations, which the compiler is much worse at optimizing away and `SIMD` takes the crown back from optimized scalar operations.
+
+## SIMD in Your Project
+
+There is so much to unpack in a discussion about using `SIMD` data types. We touched on hardward architecture, data structures, memory packing, and benchmarking, all to hopefully shed a little light on somewhat niche data strucutre. Modern object oriented programming rarely requires a more data oriented approach, but I hope I shared a little knowledge of what's available and some of the many variable that should be taken into account before implementating `SIMD` in your project.
