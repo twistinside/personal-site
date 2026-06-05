@@ -12,7 +12,7 @@
     "test:screenshots:update": "playwright test tests/site-screenshots.spec.ts --update-snapshots"
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.4",
+    "@astrojs/mdx": "^6.0.2",
     "astro": "^6.4.3"
   },
   "devDependencies": {
