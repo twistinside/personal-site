@@ -25,6 +25,12 @@ const latestFive = sorted.slice(0, 5);
         </article>
       );
     })}
+    {latestFive.length === 5 && (
+      <div class="archive-continuation">
+        <hr class="article-divider" />
+        <p class="article-content">Visit the <a href="/archive">archive</a> to keep reading.</p>
+      </div>
+    )}
   </div>
 </BaseLayout>
 
@@ -80,5 +86,18 @@ const latestFive = sorted.slice(0, 5);
     margin: 3rem 0;
     border: 0;
     border-top: 1px solid #eaeaea;
+  }
+
+  .archive-continuation {
+    margin: 1rem 0 0;
+  }
+
+  .archive-continuation .article-divider {
+    margin-bottom: 5rem;
+  }
+
+  .archive-continuation p {
+    margin: 0;
+    text-align: center;
   }
 </style>
