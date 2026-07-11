@@ -17,6 +17,10 @@ const screenshotRoutes = [
     name: 'article-seeded-random-part-1',
     path: '/articles/seeded-random-part-1',
   },
+  {
+    name: 'article-existentials',
+    path: '/articles/existentials',
+  },
 ] as const;
 
 async function loadPage(page: Page, path: string) {

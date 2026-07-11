@@ -32,6 +32,7 @@ Screenshot coverage currently includes:
 - `/about`
 - `/archive`
 - `/articles/seeded-random-part-1`
+- `/articles/existentials`
 
 If you intentionally change the visual output of one of those pages, update the baselines with:
 
