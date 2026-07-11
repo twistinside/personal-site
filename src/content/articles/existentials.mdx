@@ -1,0 +1,80 @@
+---
+date: 2026-07-10
+title: Existentials
+description: This type makes the protocol work.
+---
+You may have heard the term Existential when reading about Protocols in Swift. It comes up only rarely, and often only in passing. What is an Existential? Why are they needed in Swift? 
+
+It begins with Protocols.
+
+## Protocol Oriented Programming
+We've all seen the [famous video](https://developer.apple.com/videos/play/wwdc2015/408) introducing protocol oriented programming to WWDC15.
+
+<aside>
+If you haven't, you should watch it when you're done reading.
+</aside>
+
+Protocols are used to indicate that your types provide a specific functionality, and they can also be used to allow your code to refer to any type that conforms to that protocol as an instance of the Protocol type itself.
+
+```swift
+protocol Callable {
+     func call()
+}
+
+struct Endpoint: Callable {
+    func call() {
+        <perform endpoint call logic here>
+    }
+}
+
+class Phone: Callable {
+    func call() {
+        <perform phonecall logic here>
+    }
+}
+```
+
+You can now use either `Endpoint` or `Phone` where your code requires a `Callable`. Wherever the type of a parameter or field is restricted to a protocol type, you must use the `any` keyword.
+
+```swift
+var callable: any Callable
+```
+
+So far this is all falls under polymorphism and should be relatvely familiar to you.
+
+## But There's a Catch
+
+The Swift compiler will ensure that the type passed is `Callable`, but it has no way to understand at compilation time what concrete type `callable` will actually be. On the face of it, this doesn't seem like an issue, but take the example of an array of `Callable`.
+
+```swift
+var callables: [any Callable]
+```
+
+Swift's own [documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/collectiontypes/) says "an array stores values of the same type in an ordered list." An array that contains `Phone`s and `Endpoint`s should be impossible without something else going on under the hood.
+
+## What's Going On Under the Hood
+What's going on under the hood (as spoiled by the title of this article) is Existentials.
+
+<aside>
+You can look at the [Existential code](https://github.com/swiftlang/swift/blob/main/include/swift/Runtime/ExistentialContainer.h) yourself in Swift's public repository on GitHub.
+</aside>
+
+An Existential is a data structure that contains three things:
+1. Inline storage
+1. A type metadata pointer
+1. A witness table pointer
+
+### Inline Storage
+The inline storage is 3 words of storage (on modern M series chips, 24 bytes) that either store a pointer to the runtime instance or in the case that the type is small enough, the members of the type themselves. If your types are small enough, existential boxing doesn't even introduce the expense of pointer indirection!
+
+### Type Metadata
+Each type in your Swift code has a singleton data structure that describes the type itself. This is the size, alignment, copy, move, destroy operations, and other type-specific information for the concrete runtime type. This tells Swift how to manipulate the data stored at the pointer in inline storage.
+
+### Witness Table
+Witness tables contatin in formation about how types implement protocols. There will be a witness table for `Phone` that has a pointer to the code that implements the functions declared by `Callable`. There will be another table for `Endpoint` that has a pointer to it's `Callable` implementation. These pointers don't point to the heap, they point to the method's implementation that was mapped into memory on app load.
+
+## Swift's Other Polymorphism
+This differs from Generics in that a generic type has its type known at compile time. A type `Container<T>` will be compiled for all types `T` in your code. `Container<Endpoint>` doesn't need to indirectly store type information or a pointer to the contained data, it stores a known type `Endpoint` and can access its members and call its methods directly. For speed critical code, the lack of indirection of Generics can confer speed benefits. 
+
+## Existentials and You
+Knowing the implementation details of `any` types and the Existentials that back them shouldn't dramatically change how you write Swift code. In fact, if you keep digging, you'll find that similar data types underpin and enable similar high level language functionality in Swift and in other languages, too! Outside of very niche cases, the value you gain from using `any` types and the flexibility and legibility they lend your code are well worth the slight indirection that Existentials require.
