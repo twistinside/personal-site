@@ -1,0 +1,39 @@
+---
+date: 2026-07-24
+title: Swift and NaN
+description: Where you can find NaN in your Swift code
+---
+
+`NaN` does not just belong to our friends the loosely typed languages such as Python or JavaScript. In a world where you can blithly attempt to compute `1 + "two"`, `NaN` is a completely understandable and even requred part of how languages handle numbers. I was suprised to find `NaN` is to be found Swift's floating point math types as well.
+
+<aside>
+Anyone who has read [Apple's floating point documentation](https://developer.apple.com/documentation/swift/floatingpoint) is not surprised at all, but clearly I was not one of you.
+</aside>
+
+This behavior is derived directly from the [IEEE Standard for Floating-Point Arithmetic (IEEE 754)](https://en.wikipedia.org/wiki/IEEE_754), which describes how the use of `NaN` in floating point numbers. It also describes `infinity`, which is itself a signed value of type `Float` or `Double`.
+
+So the following code is perfectly valid (and lifted directly from the docs linked above).
+
+```
+let values: [Double] = [10.0, 25.0, -10.0, .infinity, -.infinity]
+print(values.sorted())
+// Prints "[-inf, -10.0, 10.0, 25.0, inf]"
+```
+
+`NaN` or `infinity` will poison any series of operations it is introduced to. For instance, adding or multiplying `NaN` to anything will produce `NaN`. `infinity` is similarly problematic.
+
+```
+let product = 8 * .nan    // product is .nan
+let sum = 23 + .infinity  // sum is .infinity
+```
+
+You can check for these values in your code using a few methods available on floating point types in Swift.
+
+```
+value.isFinite      // true only for ordinary numbers
+value.isInfinite    // true only for +infinity and -infinity
+value.isNaN         // true only for NaN
+value.isZero        // true for +0.0 and -0.0
+```
+
+Perhaps consider adding `.filter { $0.isFinite }` to your next floating point map?
