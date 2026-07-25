@@ -21,6 +21,10 @@ const screenshotRoutes = [
     name: 'article-existentials',
     path: '/articles/existentials',
   },
+  {
+    name: 'article-nan',
+    path: '/articles/nan',
+  },
 ] as const;
 
 async function loadPage(page: Page, path: string) {
