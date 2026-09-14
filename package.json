@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.5",
-    "astro": "^7.1.6"
+    "astro": "^7.3.2"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.1"
+    "@playwright/test": "^1.63.0"
   }
 }
